@@ -53,9 +53,11 @@ var downloads = document.getElementById('downloads')
 var downloadlink = document.getElementById('downloadlink')
 var urlsnode = document.getElementById('urls')
 var siteurl = document.getElementById('siteurl')
-var key = null
-var pollTimer = null
+var key = null       // the active 4-character session key
+var pollTimer = null // handle for the setInterval that calls pollFile every 5s
 
+// Polls GET /status/<key> to check whether a file has been uploaded.
+// Called every 5 seconds while a key is active.
 function pollFile () {
 	if (!key) {
 		keyOutput.textContent = '––––'
@@ -67,12 +69,14 @@ function pollFile () {
 		try {
 			data = JSON.parse(x.responseText)
 		} catch (err) {
+			// Couldn't parse the response — treat it as a dead session
 			key = null
 			keyOutput.textContent = '––––'
 			downloads.style.display = 'none'
 			return
 		}
 		if (data.error) {
+			// Server returned an error (e.g. key expired) — stop polling
 			if (pollTimer) clearInterval(pollTimer)
 			key = null
 			keyOutput.textContent = '––––'
@@ -80,6 +84,9 @@ function pollFile () {
 		}
 		var urls = data.urls && data.urls.length > 0 ? data.urls : null
 		if (data.file) {
+			// A file is ready — show the download link.
+			// The URL is: /<filename>?key=<KEY>
+			// The server validates both parts before streaming the file.
 			downloads.style.display = 'block'
 			downloadlink.textContent = data.file.name
 			downloadlink.href = '/' + encodeURIComponent(data.file.name) + "?key=" + key
@@ -87,6 +94,8 @@ function pollFile () {
 			downloads.style.display = 'none'
 		}
 		if (urls) {
+			// Render any URLs the desktop relayed (e.g. a web page link).
+			// Each URL becomes a clickable anchor.
 			urlsnode.innerHTML = '<br/><div style="font-size: 1.3em;"><em>Urls</em></div>'
 			urls.forEach(function (url) {
 				var urllink = document.createElement("a")
@@ -102,6 +111,9 @@ function pollFile () {
 	})
 }
 
+// Calls POST /generate to create a new session on the server.
+// The server returns the 4-character key as plain text.
+// Once the key is received, polling starts every 5 seconds.
 function generateKey () {
 	keyOutput.textContent = '––––'
 	if (pollTimer) clearInterval(pollTimer)
@@ -124,9 +136,12 @@ function generateKey () {
 
 window.onload = function () {
 	keyGenBtn.onclick = generateKey
+	// Automatically generate a key as soon as the page loads —
+	// the user just needs to read it off the screen
 	generateKey()
 }
 
+// Show the current page URL so the user knows what address to visit on their desktop
 siteurl.textContent = window.location.href
 siteurl.href = siteurl.textContent
 siteurl.target = '_self'
