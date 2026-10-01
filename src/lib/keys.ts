@@ -36,15 +36,29 @@ export async function removeKey(key: string): Promise<void> {
     if (info.timer) clearTimeout(info.timer)
     sessions.delete(key)
 
-    if (info.file) {
-        info.file.key.fill(0)
-        try {
-            await unlink(info.file.encryptedPath)
-        } catch (err) {
-            if((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-                        console.error('Could not delete', info.file.encryptedPath, err)
-            }
+    await discardFile(info)
+}
+
+// Finds a session and checks the request comes from the same ereader.
+// Returns undefined for "unknown key" AND "wrong device", so callers
+// cannot tell the two apart (and neither can the attacker)
+export function getEreaderSession(key: string, userAgent: string | undefined): SessionInfo | undefined {
+    const info = sessions.get(key.toUpperCase())
+    if (!info || info.agent !== (userAgent ?? '')) return undefined
+    return info
+}
+
+// Deletes only the stored file, keeping the session alive
+export async function discardFile(info: SessionInfo): Promise<void> {
+    const file = info.file
+    if (!file) return
+    info.file = null
+    file.key.fill(0)
+    try {
+        await unlink(file.encryptedPath)
+    } catch (err) {
+        if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+            console.error('Could not delete', file.encryptedPath, err)
         }
-        info.file = null
     }
 }

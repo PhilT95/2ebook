@@ -53,7 +53,7 @@ var downloads = document.getElementById('downloads')
 var downloadlink = document.getElementById('downloadlink')
 var urlsnode = document.getElementById('urls')
 var siteurl = document.getElementById('siteurl')
-var key = null       // the active 4-character session key
+var key = null       // the active 6-character session key
 var pollTimer = null // handle for the setInterval that calls pollFile every 5s
 
 // Polls GET /status/<key> to check whether a file has been uploaded.
@@ -112,7 +112,7 @@ function pollFile () {
 }
 
 // Calls POST /generate to create a new session on the server.
-// The server returns the 4-character key as plain text.
+// The server returns the 6-character key as plain text.
 // Once the key is received, polling starts every 5 seconds.
 function generateKey () {
 	keyOutput.textContent = '––––'
