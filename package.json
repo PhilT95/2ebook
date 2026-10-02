@@ -1,6 +1,6 @@
 {
   "name": "2ebook",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Send ebooks to Kobo/Kindle ereaders easily",
   "type": "module",
   "main": "dist/index.js",

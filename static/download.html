@@ -1,112 +1,171 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-	<title>Send to Kobo/Kindle</title>
+	<title>2ebook – Copy books to your ereader</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<link rel="stylesheet" type="text/css" href="./style.css?s"/>
-	<script src="./common.js?a"></script>
+	<!-- The ?v2 makes the ereader's aggressive cache fetch the new versions -->
+	<link rel="stylesheet" type="text/css" href="./style.css?v2"/>
+	<script src="./common.js?v2"></script>
 </head>
 <body>
 
 <div class="wrapper">
-	<h1 class="center">Send to Kobo/Kindle</h1>
+	<h1 class="center">2ebook</h1>
+	<div class="center">Copy books to your ereader</div>
 
 	<div class="center">
-		<div style="font-size: 1.3em;">Unique key:</div>
-		<div id="key">
-			<span id="keyoutput">––––</span>
-			<button id="keygen" title="Generate new key">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-					<path d="M19.146 4.854l-1.489 1.489A8 8 0 1 0 12 20a8.094 8.094 0 0 0 7.371-4.886 1 1 0 1 0-1.842-.779A6.071 6.071 0 0 1 12 18a6 6 0 1 1 4.243-10.243l-1.39 1.39a.5.5 0 0 0 .354.854H19.5A.5.5 0 0 0 20 9.5V5.207a.5.5 0 0 0-.854-.353z"/>
-				</svg>
-			</button>
-		</div>
+		<div class="label">Your unique key</div>
+		<div id="key"><span id="keyoutput">––––––</span></div><br/>
+		<button id="keygen" type="button">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+				<path d="M19.146 4.854l-1.489 1.489A8 8 0 1 0 12 20a8.094 8.094 0 0 0 7.371-4.886 1 1 0 1 0-1.842-.779A6.071 6.071 0 0 1 12 18a6 6 0 1 1 4.243-10.243l-1.39 1.39a.5.5 0 0 0 .354.854H19.5A.5.5 0 0 0 20 9.5V5.207a.5.5 0 0 0-.854-.353z"/>
+			</svg>New key</button>
+		<div id="state">Getting a key…</div>
 	</div>
 
-	<div class="center">
-		<div id="downloads">
-			<br/>
-			<div style="font-size: 1.3em;"><em>Downloads</em></div>
-			<a id="downloadlink" class="downloadlink"></a>
-		</div>
-		<div id="urls"></div>
-		<br/>
+	<div id="downloads">
+		<h2>Ready to download</h2>
+		<a id="downloadlink" class="downloadlink"></a>
 	</div>
+	<div id="urls"></div>
+
 	<hr/>
-	<br/>
-	<div class="center">
-		Visit this on other devices to send ebooks to this ereader:<br/><a id="siteurl">https://send.djazz.se</a><br/>
+
+	<div class="how">
+		<h2>How to send an ebook</h2>
+		<ol>
+			<li>On your computer or phone, open<br/><a id="siteurl">https://send.athenlyx.com</a></li>
+			<li>Enter the key shown above.</li>
+			<li>Choose an ebook and tap <em>Upload and send</em>.</li>
+			<li>The download link appears on this page.</li>
+		</ol>
+	</div>
+
+	<hr/>
+
+	<div class="center small">
+		Your ebook is encrypted on the server and deleted shortly after you leave this page.<br/>
 		<br/>
-		Created by djazz. Source code on <a href="https://github.com/daniel-j/send2ereader" target="_blank">Github</a><br/>
-		Last updated: 2024-10-20<br/>
+		Created by Phil Trommer based on the work of djazz.<br/>
+		Source code on <a href="https://github.com/PhilT95/2ebook" target="_blank">Github</a><br/>
+		Last updated: 2026-10-02
 	</div>
 </div>
 
 <div id="logs"></div>
 
 <script type="text/javascript">
+// NOTE: this page runs on old ereader browsers. Keep the JavaScript plain
+// ES5: var and function (no let/const, arrow functions, template strings).
 
 var keyOutput = document.getElementById('keyoutput')
 var keyGenBtn = document.getElementById('keygen')
+var stateNode = document.getElementById('state')
 var downloads = document.getElementById('downloads')
 var downloadlink = document.getElementById('downloadlink')
 var urlsnode = document.getElementById('urls')
 var siteurl = document.getElementById('siteurl')
+
+var EMPTY_KEY = '––––––'
 var key = null       // the active 6-character session key
 var pollTimer = null // handle for the setInterval that calls pollFile every 5s
 
-// Polls GET /status/<key> to check whether a file has been uploaded.
+function setState(text) {
+	stateNode.textContent = text
+}
+
+// Removes the "Links" box content and hides it
+function clearUrls () {
+	while (urlsnode.firstChild) {
+		urlsnode.removeChild(urlsnode.firstChild)
+	}
+	urlsnode.style.display = 'none'
+}
+
+// Shows each URL the desktop relayed (e.g. a web page link) as a tappable link.
+// Built with textContent and createElement, never innerHTML, because the
+// text comes from another person's request.
+function showUrls (urls) {
+	clearUrls()
+	var heading = document.createElement('h2')
+	heading.textContent = 'Links'
+	urlsnode.appendChild(heading)
+	urls.forEach(function (url) {
+		var urllink = document.createElement('a')
+		urllink.href = url
+		urllink.target = '_blank'
+		urllink.textContent = url
+		urllink.className = 'downloadlink'
+		urlsnode.appendChild(urllink)
+	})
+	urlsnode.style.display = 'block'
+}
+
+// Forgets the current session and clears everything it was showing
+function endSession (message) {
+	if (pollTimer) clearInterval(pollTimer)
+	pollTimer = null
+	key = null
+	keyOutput.textContent = EMPTY_KEY
+	downloads.style.display = 'none'
+	downloadlink.removeAttribute('href')
+	clearUrls()
+	setState(message)
+}
+
+// Polls GET /status/<key> to check whether a file or url has been sent.
 // Called every 5 seconds while a key is active.
 function pollFile () {
-	if (!key) {
-		keyOutput.textContent = '––––'
-		downloads.style.display = 'none'
-		return
-	}
-	xhr('GET', './status/' + key, function (x) {
+	if (!key) return
+	var polledKey = key
+	xhr('GET', './status/' + polledKey, function (x) {
+		// A new key was generated while we waited for this answer: ignore it
+		if (key !== polledKey) return
+
+		// Status 0 means the request never reached the server (wifi dropped).
+		// Keep the key and try again at the next poll.
+		if (x.status === 0) {
+			setState('Connection lost. Trying again…')
+			return
+		}
+
 		var data
 		try {
 			data = JSON.parse(x.responseText)
 		} catch (err) {
-			// Couldn't parse the response — treat it as a dead session
-			key = null
-			keyOutput.textContent = '––––'
-			downloads.style.display = 'none'
+			endSession('Something went wrong. Tap "New key" to start again.')
 			return
 		}
 		if (data.error) {
-			// Server returned an error (e.g. key expired) — stop polling
-			if (pollTimer) clearInterval(pollTimer)
-			key = null
-			keyOutput.textContent = '––––'
-			downloads.style.display = 'none'
+			// The server no longer knows this key: it expired
+			endSession('This key has expired. Tap "New key" to get a new one.')
+			return
 		}
-		var urls = data.urls && data.urls.length > 0 ? data.urls : null
+
 		if (data.file) {
-			// A file is ready — show the download link.
-			// The URL is: /<filename>?key=<KEY>
-			// The server validates both parts before streaming the file.
-			downloads.style.display = 'block'
+			// A file is ready. The link is /<filename>?key=<KEY>;
+			// the server checks both before sending the file.
 			downloadlink.textContent = data.file.name
-			downloadlink.href = '/' + encodeURIComponent(data.file.name) + "?key=" + key
+			downloadlink.href = '/' + encodeURIComponent(data.file.name) + '?key=' + key
+			downloads.style.display = 'block'
 		} else {
 			downloads.style.display = 'none'
 		}
+
+		var urls = data.urls && data.urls.length > 0 ? data.urls : null
 		if (urls) {
-			// Render any URLs the desktop relayed (e.g. a web page link).
-			// Each URL becomes a clickable anchor.
-			urlsnode.innerHTML = '<br/><div style="font-size: 1.3em;"><em>Urls</em></div>'
-			urls.forEach(function (url) {
-				var urllink = document.createElement("a")
-				urllink.href = url
-				urllink.target = '_blank'
-				urllink.textContent = url
-				urllink.className = "downloadlink"
-				var div = document.createElement('div')
-				div.appendChild(urllink)
-				urlsnode.appendChild(div)
-			})
+			showUrls(urls)
+		} else {
+			clearUrls()
+		}
+
+		if (data.file) {
+			setState('Done! Tap the file below to download it.')
+		} else if (urls) {
+			setState('Done! Tap a link below to open it.')
+		} else {
+			setState('Waiting for an upload…')
 		}
 	})
 }
@@ -115,20 +174,19 @@ function pollFile () {
 // The server returns the 6-character key as plain text.
 // Once the key is received, polling starts every 5 seconds.
 function generateKey () {
-	keyOutput.textContent = '––––'
-	if (pollTimer) clearInterval(pollTimer)
-	downloads.style.display = 'none'
+	endSession('Getting a key…')
+	keyGenBtn.disabled = true // prevents asking for two keys with a double tap
 	xhr('POST', './generate', function (x) {
-		if (x.responseText !== 'error' && x.status === 200) {
+		keyGenBtn.disabled = false
+		if (x.status === 200 && x.responseText !== 'error') {
 			key = x.responseText
 			keyOutput.textContent = key
-			downloadlink.href = ''
-			if (pollTimer) clearInterval(pollTimer)
+			setState('Waiting for an upload…')
 			pollTimer = setInterval(pollFile, 5 * 1000)
+		} else if (x.status === 429) {
+			endSession('Too many requests. Wait a minute, then tap "New key".')
 		} else {
-			key = null
-			keyOutput.textContent = '––––'
-			downloadlink.href = ''
+			endSession('Could not get a key. Check your wifi, then tap "New key".')
 		}
 		keyGenBtn.blur()
 	})
@@ -136,7 +194,7 @@ function generateKey () {
 
 window.onload = function () {
 	keyGenBtn.onclick = generateKey
-	// Automatically generate a key as soon as the page loads —
+	// Automatically generate a key as soon as the page loads,
 	// the user just needs to read it off the screen
 	generateKey()
 }
