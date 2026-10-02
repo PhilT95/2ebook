@@ -1,125 +1,147 @@
+/* Stylesheet for the ereader page (download.html).
+   Kobo and Kindle browsers are old and have e-ink screens, so on purpose:
+   - only plain black and white, thick borders, no shadows or gradients
+   - no animations (e-ink refreshes slowly)
+   - no modern CSS (no flexbox, grid, custom properties) */
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
 
 body {
-    line-height: 1.3;
-    font-family: serif;
+    margin: 0;
+    background: #fff;
+    color: #000;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    line-height: 1.4;
 }
 
 .wrapper {
+    max-width: 600px;
     margin: 0 auto;
-    padding: 0 20px;
-    max-width: 650px;
+    padding: 0 20px 30px;
 }
+
 h1 {
-    font-size: 2em;
-    font-weight: normal;
-    font-style: italic;
+    margin: 0.7em 0 0.5em;
+    font-size: 1.8em;
+    font-weight: bold;
 }
-#keyoutput {
-    font-size: 5em;
-    display: inline-block;
-    letter-spacing: 0.2em;
-    margin: 10px 0;
-    font-family: monospace, sans-serif;
-    white-space: nowrap;
-    text-transform: uppercase;
-    vertical-align: middle;
+
+h2 {
+    margin: 0 0 0.4em;
+    font-size: 1.15em;
 }
+
+a {
+    color: #000;
+    text-decoration: underline;
+}
+
+hr {
+    margin: 1.4em 0;
+    border: 0;
+    border-top: 2px solid #000;
+}
+
 .center {
     text-align: center;
 }
-.right {
-    text-align: right;
+
+.small {
+    font-size: 0.85em;
 }
-#keygen, .downloadlink, #choosebtn, input[type="submit"] {
-    background: #CCC;
-    border: none;
-    color: black;
-    font-style: italic;
-    padding: 0.6em 1.3em;
-    line-height: 1.6;
-    display: inline-block;
-    font-family: inherit;
+
+/* ---- the key ---- */
+.label {
     font-size: 1.2em;
-    margin: 0 0.5em;
-    vertical-align: middle;
-    cursor: pointer;
-    font-weight: normal;
 }
-#keygen {
-    margin-left: 1em;
-    margin-right: -2em;
-    padding: 1em;
+
+#key {
+    display: inline-block;
+    margin: 0.3em 0 0.8em;
+    padding: 8px 16px;
+    border: 3px solid #000;
+    border-radius: 12px;
 }
-#keygen:focus, #downloadlink:focus, #choosebtn:focus, input[type="submit"]:focus,
-#keygen:active, #downloadlink:active, #choosebtn:active, input[type="submit"]:active {
-    background: black;
-    color: white;
-}
-#keygen svg {
+
+#keyoutput {
     display: block;
-    width: 1.5em;
-    height: 1.5em;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 52px;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-indent: 0.12em; /* balances the space letter-spacing adds after the last character */
+    line-height: 1.2;
+    white-space: nowrap;
+    text-transform: uppercase;
 }
+
+#state {
+    min-height: 1.4em;
+    margin: 0.8em 0 0;
+    font-style: italic;
+}
+
+/* ---- buttons and download links ---- */
+#keygen, .downloadlink {
+    display: inline-block;
+    padding: 0.6em 1.2em;
+    background: #fff;
+    color: #000;
+    border: 3px solid #000;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1.1em;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#keygen svg {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 0.4em;
+    vertical-align: -0.2em;
+}
+
+/* Pressed: invert, so a tap is visible on the e-ink screen */
+#keygen:active, #keygen:focus,
+.downloadlink:active, .downloadlink:focus {
+    background: #000;
+    color: #fff;
+}
+
 .downloadlink {
-    margin: 0.5em;
+    display: block;
+    margin: 0.6em 0 0;
+    font-weight: bold;
+    word-wrap: break-word;
 }
+
+/* ---- boxes that appear when something was sent ---- */
+#downloads, #urls {
+    margin: 1.2em 0 0;
+    padding: 0.8em 1em 1em;
+    border: 3px solid #000;
+    border-radius: 12px;
+}
+
 #downloads {
     display: none;
 }
 
-
-
-
-#keyinput {
-    font-size: 4em;
-    width: 3.5em;
-    text-align: center;
-    font-family: monospace;
-    letter-spacing: 0.1em;
+/* ---- instructions ---- */
+.how {
+    text-align: left;
 }
 
-input[type="url"], input[type="text"] {
-    background: white;
-    border: 1px solid #AAA;
-    padding: 5px;
-    font-family: serif;
+.how ol {
+    margin: 0.4em 0 0;
+    padding-left: 1.6em;
 }
 
-#uploadstatus {
-    opacity: 0;
-    transition: opacity .5s ease-in-out;
-    padding: 10px;
-    margin-top: 20px;
-    border-radius: 5px;
-    text-align: center;
-    cursor: pointer;
-    line-height: 1.7;
-}
-
-#uploadstatus.success {
-    background-color: #DFD;
-    border: 1px solid #7F7;
-}
-
-#uploadstatus.error {
-    background-color: #FDD;
-    border: 1px solid #F77;
-    white-space: pre;
-}
-td {
-    padding: 10px;
-}
-
-td.aligntop {
-    vertical-align: top;
-}
-
-#fileinput {
-    display: none;
-}
-
-#fileinfo {
-    font-size: 0.9em;
-    font-style: italic;
-    width: 18em;
+.how li {
+    margin-bottom: 0.4em;
 }

@@ -10,3 +10,13 @@ services:
     # Format: <External Port>:<Internal Port>
     ports:
       - 3001:3001
+    # Conversions (kepubify, kindlegen, pdfcropmargins) write the plaintext
+    # ebook to /tmp for a moment. Mounting /tmp as RAM keeps it off the disk.
+    tmpfs:
+      - /tmp:size=512m
+    # The processes inside cannot gain extra privileges...
+    security_opt:
+      - no-new-privileges:true
+    # ...and start without any special Linux capabilities
+    cap_drop:
+      - ALL
