@@ -4,6 +4,12 @@ import { expireKey, randomKey, removeKey, sessions } from '../lib/keys.js'
 import type { SessionInfo } from '../types.js'
 
 const generateRoute: FastifyPluginAsync = async (app) => {
+    // Old ereader browsers (Kobo) send this empty POST as
+    // application/x-www-form-urlencoded, which Fastify rejects with 415.
+    // The body is never used, so accept any content type and ignore it.
+    app.addContentTypeParser('*', (_request, _payload, done) => done(null, undefined))
+    app.addContentTypeParser('application/x-www-form-urlencoded', (_request, _payload, done) => done(null, undefined))
+
     app.post(
         '/generate',
         { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
