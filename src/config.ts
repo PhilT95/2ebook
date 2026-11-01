@@ -29,3 +29,7 @@ export const MIME_BY_EXTENSION: Record<string, string | undefined> = {
 }
 
 export const UPLOADS_DIR = join(import.meta.dirname, '..', 'uploads')
+
+
+// Switch to disable PDF Crop until PyMuPDF and Pillow ship Brotli 1.2.1 or newer (CVE-2026-111497)
+export const PDF_CROP_ENABLED = false

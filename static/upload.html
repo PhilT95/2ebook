@@ -48,10 +48,12 @@
 					<span class="option-text"><span class="option-name">KindleGen</span><span class="option-desc">Convert EPUB to MOBI (Kindle only)</span></span>
 					<input type="checkbox" class="switch" name="kindlegen" id="kindlegen" checked/>
 				</label>
+				<!-- Disabled until PyMuPDF and Pillow ship Brotli 1.2.1 or newer (CVE-2026-111497)
 				<label class="option">
 					<span class="option-text"><span class="option-name">Crop margins of PDFs</span><span class="option-desc">Trim the white margins of a PDF</span></span>
 					<input type="checkbox" class="switch" name="pdfcropmargins" id="pdfcropmargins"/>
 				</label>
+				-->
 				<label class="option">
 					<span class="option-text"><span class="option-name">Transliterate filename</span><span class="option-desc">Replace special characters in the filename</span></span>
 					<input type="checkbox" class="switch" name="transliteration" id="transliteration"/>
@@ -82,12 +84,12 @@
 			<p>Go to this page on your Kobo/Kindle ereader and you see a unique key. Enter it in this form and upload an ebook and it will appear as a download link on the ereader.</p>
 			<p>If you send an EPUB file to a Kindle it will be converted to MOBI with KindleGen. If you send a MOBI file to a Kindle it will be sent unprocessed. Files sent to Kindle eReaders will have their names stripped of special characters, a limitation of the Kindle browser. If you send an EPUB file and tick the Kepubify checkbox, it will be converted into a Kobo EPUB using Kepubify. If you send a MOBI file to a Kobo, it will not be converted.</p>
 			<p>Your ebook is encrypted on the server with a random key that exists only in the server's memory, so the file cannot be read from disk or from a backup. It is deleted irrevocably when the key expires, about 30 seconds after you close the browser, generate a new key or disable wifi on your ereader.</p>
-			<p>If you tick a conversion option (Kepubify, KindleGen or Crop margins), the file is briefly written unencrypted to a private temporary folder while it is converted, and deleted right afterwards. By using this tool you agree that the ebook you upload is processed on the server and stored, encrypted, for a short time.</p>
+			<p>If you tick a conversion option (Kepubify or KindleGen), the file is briefly written unencrypted to a private temporary folder while it is converted, and deleted right afterwards. By using this tool you agree that the ebook you upload is processed on the server and stored, encrypted, for a short time.</p>
 	</div>
 </details>
 
 <footer>
-	Created by Phil Trommer based on the work of djazz. Powered by <a href="https://fastify.dev/" target="_blank">Fastify</a>, <a href="https://pgaskin.net/kepubify/" target="_blank">Kepubify</a>, <a href="https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211" target="_blank">KindleGen</a> and <a href="https://github.com/abarker/pdfCropMargins" target="_blank">pdfCropMargins</a><br/>
+	Created by Phil Trommer based on the work of djazz. Powered by <a href="https://fastify.dev/" target="_blank">Fastify</a>, <a href="https://pgaskin.net/kepubify/" target="_blank">Kepubify</a> and <a href="https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211" target="_blank">KindleGen</a><br/>
 	Source code on <a href="https://github.com/PhilT95/2ebook" target="_blank">Github</a> - <a id="siteurl">https://send.athenlyx.com</a><br/>
 	Last updated: 2026-10-02
 </footer>

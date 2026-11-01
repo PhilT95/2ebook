@@ -32,10 +32,9 @@ RUN wget https://github.com/zzet/fp-docker/raw/f2b41fb0af6bb903afd0e429d5487acc6
     chmod +x /usr/local/bin/kindlegen && \
     rm -rf kindlegen kindlegen_linux_2.6_i386_v2_9.tar.gz
 
-# Install pdfCropMargins system-wide (not under /root) so the unprivileged
-# "node" user below is able to run it
-ENV PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin
-RUN apk add --no-cache pipx && pipx install pdfCropMargins
+# Disabled until PyMuPDF and Pillow ship Brotli 1.2.1 or newer (CVE-2026-111497)
+# ENV PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin
+# RUN apk add --no-cache pipx && pipx install pdfCropMargins
 
 # Production dependencies only (no TypeScript, no tsx)
 COPY package*.json ./

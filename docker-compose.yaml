@@ -10,7 +10,7 @@ services:
     # Format: <External Port>:<Internal Port>
     ports:
       - 3001:3001
-    # Conversions (kepubify, kindlegen, pdfcropmargins) write the plaintext
+    # Conversions (kepubify, kindlegen) write the plaintext
     # ebook to /tmp for a moment. Mounting /tmp as RAM keeps it off the disk.
     tmpfs:
       - /tmp:size=512m

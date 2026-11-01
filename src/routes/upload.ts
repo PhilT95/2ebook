@@ -3,7 +3,7 @@ import { extname, join } from 'node:path'
 import type { FastifyPluginAsync } from 'fastify'
 import { fileTypeFromBuffer } from 'file-type'
 import sanitize from 'sanitize-filename'
-import { ALLOWED_EXTENSIONS, ALLOWED_TYPES, MAX_FILE_SIZE, TYPE_EPUB, UPLOADS_DIR } from '../config.js'
+import { ALLOWED_EXTENSIONS, ALLOWED_TYPES, MAX_FILE_SIZE, PDF_CROP_ENABLED, TYPE_EPUB, UPLOADS_DIR } from '../config.js'
 import { runKepubify, runKindlegen, runPdfCropMargins } from '../lib/convert.js'
 import { encryptToFile } from '../lib/crypto.js'
 import { doTransliterate, kindleSafeFilename } from '../lib/filename.js'
@@ -82,7 +82,7 @@ async function prepareFile(
             conversion = 'kepubify'
             data = await runKepubify(data)
             filename = filename.replace(/\.kepub\.epub$/i, '.epub').replace(/\.epub$/i, '.kepub.epub')
-        } else if (mimetype === 'application/pdf' && fields.has('pdfcropmargins')) {
+        } else if (PDF_CROP_ENABLED && mimetype === 'application/pdf' && fields.has('pdfcropmargins')) {
             conversion = 'pdfcropmargins'
             data = await runPdfCropMargins(data)
         } else {
