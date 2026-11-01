@@ -13,7 +13,7 @@ import downloadRoute from "./routes/download.js"
 import uploadRoute from "./routes/upload.js"
 
 export function buildApp() {
-    const app = Fastify({ logger: true}) // built-in structured logging
+    const app = Fastify({ logger: true, routerOptions: {maxParamLength: 1024}}) // built-in structured logging
 
     app.register(cookie)
     app.register(rateLimit, { max: 60, timeWindow: '1 minute'})

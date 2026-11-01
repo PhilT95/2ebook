@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Upgraded `file-type` to 22.3.0: a crafted 55-byte upload could freeze the server (CVE-2026-31808).
 - Disabled PDF margin cropping: PyMuPDF bundles a Brotli decoder in the range affected by CVE-2026-111497.
 
+### Fixed
+- Uploads failed with "invalid type" when a filename was too long or contained only characters that get removed; the extension is now always kept.
+- Downloads failed with 414 for filenames longer than 100 characters.
+
 ## [0.1.0] - 2026-10-02
 
 First beta release. A rewrite of the original [send2ereader](https://github.com/daniel-j/send2ereader) in TypeScript with Fastify.
