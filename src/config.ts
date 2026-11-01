@@ -33,3 +33,20 @@ export const UPLOADS_DIR = join(import.meta.dirname, '..', 'uploads')
 
 // Switch to disable PDF Crop until PyMuPDF and Pillow ship Brotli 1.2.1 or newer (CVE-2026-111497)
 export const PDF_CROP_ENABLED = false
+
+
+// Optional Plausible script. Left empty, the app sends nothing to analytics.
+function readPlausibleUrl(): string {
+    const raw = process.env.PLAUSIBLE_SCRIPT_URL?.trim()
+    if (!raw) return ''
+    try {
+        const url = new URL(raw)
+        if (url.protocol === 'https:') return url.href
+    } catch {
+        // not a URL, handled below
+    }
+    console.warn('Ignoring PLAUSIBLE_SCRIPT_URL: it must be a valid https URL')
+    return ''
+}
+
+export const PLAUSIBLE_SCRIPT_URL = readPlausibleUrl()

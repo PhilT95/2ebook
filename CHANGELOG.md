@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-01
+
+### Added
+- Optional Plausible analytics on the upload page, enabled with the `PLAUSIBLE_SCRIPT_URL` environment variable. Off by default; the ereader page never loads it.
+
 ### Security
 - Upgraded `file-type` to 22.3.0: a crafted 55-byte upload could freeze the server (CVE-2026-31808).
 - Disabled PDF margin cropping: PyMuPDF bundles a Brotli decoder in the range affected by CVE-2026-111497.
@@ -13,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - Uploads failed with "invalid type" when a filename was too long or contained only characters that get removed; the extension is now always kept.
 - Downloads failed with 414 for filenames longer than 100 characters.
+- Old ereader browsers (Kobo) could not generate a key because Fastify rejected their empty POST with 415.
 
 ## [0.1.0] - 2026-10-02
 
@@ -65,5 +71,6 @@ First beta release. A rewrite of the original [send2ereader](https://github.com/
 - Plaintext ebooks are never written to the upload directory.
 - Docker `tmpfs` keeps the temporary conversion files off disk.
 
-[Unreleased]: https://github.com/PhilT95/2ebook/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/PhilT95/2ebook/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/PhilT95/2ebook/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/PhilT95/2ebook/releases/tag/v0.1.0

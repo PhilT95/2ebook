@@ -18,6 +18,8 @@ If a conversion option (Kepubify, KindleGen) is used, the file is briefly writte
 
 This does not protect against someone who can read the server's memory while it is running.
 
+Analytics are off by default. If you set `PLAUSIBLE_SCRIPT_URL`, the upload page loads that Plausible script and shows a short notice. The ereader page never loads it.
+
 ## How To Run
 
 ### On Your Host OS
@@ -45,5 +47,10 @@ docker compose build
 docker compose up -d
 ```
 5. Access the service on HTTP, default port 3001 (http://localhost:3001)
+
+To enable Plausible analytics, create a `.env` file next to `docker-compose.yaml` with the URL of your script, then run `docker compose up -d`:
+```
+PLAUSIBLE_SCRIPT_URL=https://your-plausible-host/js/your-script.js
+```
 
 The service speaks plain HTTP. When you host it publicly, put it behind a reverse proxy that provides HTTPS.
