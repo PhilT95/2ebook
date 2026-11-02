@@ -6,24 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
 ### Added
+- Optional Plausible analytics on the upload page, enabled with `PLAUSIBLE_ENABLED=true`. The script and events go through the site's own domain, using `/js/script.js` and `/api/event` on the reverse proxy. Off by default; the ereader page never loads it. A notice on the upload page lists everything the script measures.
 - `TRUST_PROXY` environment variable, so that the rate limit counts each visitor separately behind a reverse proxy.
 - Example nginx configuration in `examples/nginx/2ebook.conf.example`.
-
-### Changed
-- Plausible analytics now load through the site's own domain, using `/js/script.js` and `/api/event` on the reverse proxy. They are enabled with `PLAUSIBLE_ENABLED=true`, which replaces `PLAUSIBLE_SCRIPT_URL`.
-
-### Security
-- `docker-compose.yaml` publishes port 3001 on `127.0.0.1` only, so the app can no longer be reached directly from outside and bypass the reverse proxy.
-
-## [0.2.0] - 2026-11-01
-
-### Added
-- Optional Plausible analytics on the upload page, enabled with the `PLAUSIBLE_SCRIPT_URL` environment variable. Off by default; the ereader page never loads it.
 
 ### Security
 - Upgraded `file-type` to 22.3.0: a crafted 55-byte upload could freeze the server (CVE-2026-31808).
 - Disabled PDF margin cropping: PyMuPDF bundles a Brotli decoder in the range affected by CVE-2026-111497.
+- `docker-compose.yaml` publishes port 3001 on `127.0.0.1` only, so the app can no longer be reached directly from outside and bypass the reverse proxy.
 
 ### Fixed
 - Uploads failed with "invalid type" when a filename was too long or contained only characters that get removed; the extension is now always kept.

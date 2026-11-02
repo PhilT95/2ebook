@@ -5,7 +5,7 @@ import { PLAUSIBLE_ENABLED } from '../config.js'
 
 const EREADER_MARKERS = ['Kobo', 'Kindle', 'tolino', 'eReader']
 
-const ANALYTICS_NOTICE = 'This site counts page visits with Plausible, a privacy-friendly analytics tool that uses no cookies. Your ebook, its filename and your key are not sent to it.'
+const ANALYTICS_NOTICE = 'This site uses Plausible, a privacy-friendly analytics tool without cookies, to count page visits, form submissions and clicks on external links, and to measure how far and how long pages are viewed. Your ebook, its filename and your key are not sent to it.'
 
 const ANALYTICS_SNIPPET = `<!-- Privacy-friendly analytics by Plausible -->
 <script async src="/js/script.js"></script>
