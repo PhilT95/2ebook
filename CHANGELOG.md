@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- `TRUST_PROXY` environment variable, so that the rate limit counts each visitor separately behind a reverse proxy.
+- Example nginx configuration in `examples/nginx/2ebook.conf.example`.
+
+### Changed
+- Plausible analytics now load through the site's own domain, using `/js/script.js` and `/api/event` on the reverse proxy. They are enabled with `PLAUSIBLE_ENABLED=true`, which replaces `PLAUSIBLE_SCRIPT_URL`.
+
+### Security
+- `docker-compose.yaml` publishes port 3001 on `127.0.0.1` only, so the app can no longer be reached directly from outside and bypass the reverse proxy.
+
 ## [0.2.0] - 2026-11-01
 
 ### Added

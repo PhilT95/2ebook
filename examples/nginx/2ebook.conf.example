@@ -1,0 +1,81 @@
+# Example nginx configuration for 2ebook. Replace 2ebook.example.com,
+# plausible.example.com and pa-XXXXX.js with your own values.
+#
+# In the container's .env file, set TRUST_PROXY=true. If you do not use Plausible,
+# remove the two Plausible locations, the resolver and the two "set" lines.
+
+# Plausible only: caches the script. Goes in the http block, once per nginx server.
+# The directory must exist and be writable by the nginx worker user.
+proxy_cache_path /var/cache/nginx/jscache levels=1:2 keys_zone=jscache:10m inactive=30d max_size=100m use_temp_path=off;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name 2ebook.example.com;
+    # If certificate renewal uses HTTP validation, add its location here
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name 2ebook.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/2ebook.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/2ebook.example.com/privkey.pem;
+    # Old ereader browsers may not support TLS 1.3, so keep TLS 1.2 enabled
+
+    # Request URLs contain ereader keys and filenames
+    access_log off;
+
+    # Needed because proxy_pass below uses variables. Remove if already set globally.
+    resolver 9.9.9.9 valid=300s;
+    # Use the script URL of this site from Plausible's site settings
+    set $plausible_script_url https://plausible.example.com/js/pa-XXXXX.js;
+    set $plausible_event_url  https://plausible.example.com/api/event;
+
+    # The app's limit is 100 MB; this allows for the form overhead
+    client_max_body_size 101m;
+
+    location = /js/script.js {
+        proxy_pass $plausible_script_url;
+        proxy_set_header Host plausible.example.com;
+        proxy_ssl_server_name on;
+        proxy_buffering on;
+        proxy_cache jscache;
+        # The default key would mix up the scripts of sites that share this cache
+        proxy_cache_key $plausible_script_url;
+        proxy_cache_valid 200 5m;
+        proxy_cache_use_stale updating error timeout invalid_header http_500;
+        add_header X-Cache $upstream_cache_status;
+    }
+
+    location = /api/event {
+        proxy_pass $plausible_event_url;
+        proxy_set_header Host plausible.example.com;
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+        # Without the visitor's address, Plausible silently drops the event
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        # Replaces any address the visitor sent, so it cannot be faked
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Keep unencrypted ebooks out of nginx's temporary files on disk
+        proxy_request_buffering off;
+        proxy_buffering off;
+
+        # Conversions can take a while
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+}

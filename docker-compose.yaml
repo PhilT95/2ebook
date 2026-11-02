@@ -7,12 +7,14 @@ services:
     # Restart means, Automatic re-start the container after a shutdown unless manual stop container
     restart: unless-stopped
     # Ports means, Bind external and internal docker ports, only change the external port, not the internal port
-    # Format: <External Port>:<Internal Port>
+    # Format: <Host Address>:<External Port>:<Internal Port>
+    # Only reachable from this machine: public traffic goes through the reverse proxy.
     ports:
-      - 3001:3001
-    # Optional, read from a .env file next to this file. Empty means no analytics.
+      - 127.0.0.1:3001:3001
+    # Optional, read from a .env file next to this file. See the README.
     environment:
-      - PLAUSIBLE_SCRIPT_URL=${PLAUSIBLE_SCRIPT_URL:-}
+      - PLAUSIBLE_ENABLED=${PLAUSIBLE_ENABLED:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-false}
     # Conversions (kepubify, kindlegen) write the plaintext
     # ebook to /tmp for a moment. Mounting /tmp as RAM keeps it off the disk.
     tmpfs:

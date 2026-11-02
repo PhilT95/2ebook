@@ -3,7 +3,7 @@ import staticPlugin from "@fastify/static"
 import multipart from "@fastify/multipart"
 import rateLimit from "@fastify/rate-limit"
 import cookie from "@fastify/cookie"
-import { MAX_FILE_SIZE } from "./config.js"
+import { MAX_FILE_SIZE, TRUST_PROXY } from "./config.js"
 import { join } from 'node:path'
 import generateRoute from './routes/generate.js'
 import statusRoute from './routes/status.js'
@@ -13,7 +13,12 @@ import downloadRoute from "./routes/download.js"
 import uploadRoute from "./routes/upload.js"
 
 export function buildApp() {
-    const app = Fastify({ logger: true, routerOptions: {maxParamLength: 1024}}) // built-in structured logging
+    const app = Fastify({
+        logger: true, // built-in structured logging
+        routerOptions: {maxParamLength: 1024},
+        // Trust only the proxy connecting to us, so the rate limit uses the last address it added
+        trustProxy: TRUST_PROXY ? (_address, hop) => hop === 0 : false
+    })
 
     app.register(cookie)
     app.register(rateLimit, { max: 60, timeWindow: '1 minute'})

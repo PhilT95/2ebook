@@ -35,18 +35,9 @@ export const UPLOADS_DIR = join(import.meta.dirname, '..', 'uploads')
 export const PDF_CROP_ENABLED = false
 
 
-// Optional Plausible script. Left empty, the app sends nothing to analytics.
-function readPlausibleUrl(): string {
-    const raw = process.env.PLAUSIBLE_SCRIPT_URL?.trim()
-    if (!raw) return ''
-    try {
-        const url = new URL(raw)
-        if (url.protocol === 'https:') return url.href
-    } catch {
-        // not a URL, handled below
-    }
-    console.warn('Ignoring PLAUSIBLE_SCRIPT_URL: it must be a valid https URL')
-    return ''
-}
+// Optional Plausible analytics. The reverse proxy must forward /js/script.js and /api/event (see README).
+export const PLAUSIBLE_ENABLED = process.env.PLAUSIBLE_ENABLED === 'true'
 
-export const PLAUSIBLE_SCRIPT_URL = readPlausibleUrl()
+
+// Set when a reverse proxy runs in front of the app. Without it, all visitors share one rate limit.
+export const TRUST_PROXY = process.env.TRUST_PROXY === 'true'

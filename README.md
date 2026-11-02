@@ -18,7 +18,7 @@ If a conversion option (Kepubify, KindleGen) is used, the file is briefly writte
 
 This does not protect against someone who can read the server's memory while it is running.
 
-Analytics are off by default. If you set `PLAUSIBLE_SCRIPT_URL`, the upload page loads that Plausible script and shows a short notice. The ereader page never loads it.
+Analytics are off by default. If you set `PLAUSIBLE_ENABLED=true`, the upload page loads the Plausible script through your reverse proxy and shows a short notice. Visitor IP addresses pass through the proxy to Plausible. The ereader page never loads the script.
 
 ## How To Run
 
@@ -48,9 +48,18 @@ docker compose up -d
 ```
 5. Access the service on HTTP, default port 3001 (http://localhost:3001)
 
-To enable Plausible analytics, create a `.env` file next to `docker-compose.yaml` with the URL of your script, then run `docker compose up -d`:
+The container is only reachable from the same machine.
+
+### Behind A Reverse Proxy
+
+The service speaks plain HTTP. When you host it publicly, put it behind a reverse proxy that provides HTTPS. [`examples/nginx/2ebook.conf.example`](examples/nginx/2ebook.conf.example) is a complete nginx configuration. Keep its buffering settings: with nginx's defaults, large uploads and downloads can be written unencrypted to its temporary files on disk.
+
+Settings for the container go in a `.env` file next to `docker-compose.yaml`. Apply changes with `docker compose up -d`.
+
 ```
-PLAUSIBLE_SCRIPT_URL=https://your-plausible-host/js/your-script.js
+TRUST_PROXY=true
+PLAUSIBLE_ENABLED=true
 ```
 
-The service speaks plain HTTP. When you host it publicly, put it behind a reverse proxy that provides HTTPS.
+- `TRUST_PROXY`: set this to `true` behind a reverse proxy, otherwise all visitors share one rate limit. The proxy must set `X-Forwarded-For` to the visitor's address, and the app must not be directly reachable, or visitors can fake their address.
+- `PLAUSIBLE_ENABLED`: optional. Adds Plausible to the upload page. The proxy must forward `/js/script.js` and `/api/event` to your Plausible server, as the example shows.
