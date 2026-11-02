@@ -29,3 +29,15 @@ export const MIME_BY_EXTENSION: Record<string, string | undefined> = {
 }
 
 export const UPLOADS_DIR = join(import.meta.dirname, '..', 'uploads')
+
+
+// Switch to disable PDF Crop until PyMuPDF and Pillow ship Brotli 1.2.1 or newer (CVE-2026-111497)
+export const PDF_CROP_ENABLED = false
+
+
+// Optional Plausible analytics. The reverse proxy must forward /js/script.js and /api/event (see README).
+export const PLAUSIBLE_ENABLED = process.env.PLAUSIBLE_ENABLED === 'true'
+
+
+// Set when a reverse proxy runs in front of the app. Without it, all visitors share one rate limit.
+export const TRUST_PROXY = process.env.TRUST_PROXY === 'true'

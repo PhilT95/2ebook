@@ -2,11 +2,10 @@ import { randomUUID } from 'node:crypto'
 import { extname, join } from 'node:path'
 import type { FastifyPluginAsync } from 'fastify'
 import { fileTypeFromBuffer } from 'file-type'
-import sanitize from 'sanitize-filename'
-import { ALLOWED_EXTENSIONS, ALLOWED_TYPES, MAX_FILE_SIZE, TYPE_EPUB, UPLOADS_DIR } from '../config.js'
+import { ALLOWED_EXTENSIONS, ALLOWED_TYPES, MAX_FILE_SIZE, PDF_CROP_ENABLED, TYPE_EPUB, UPLOADS_DIR } from '../config.js'
 import { runKepubify, runKindlegen, runPdfCropMargins } from '../lib/convert.js'
 import { encryptToFile } from '../lib/crypto.js'
-import { doTransliterate, kindleSafeFilename } from '../lib/filename.js'
+import { doTransliterate, kindleSafeFilename, safeFilename } from '../lib/filename.js'
 import { discardFile, expireKey, sessions } from '../lib/keys.js'
 
 
@@ -53,7 +52,7 @@ async function prepareFile(
 ): Promise<PreparedFile> {
     if (upload.data.length === 0) throw new UploadError('Invalid file submitted (empty file)')
     
-    let filename = sanitize(upload.filename)
+    let filename = safeFilename(upload.filename)
     const extension = extname(filename).slice(1).toLowerCase()
 
     // Detect the real type from the file's first bytes, not from what the browser claims
@@ -67,7 +66,7 @@ async function prepareFile(
         throw new UploadError(`Uploaded file is of an invalid type: ${filename} (${detected?.mime ?? 'unknown mimetype'})`)
     }
 
-    if (fields.has('transliteration')) filename = sanitize(doTransliterate(filename))
+    if (fields.has('transliteration')) filename = safeFilename(doTransliterate(filename))
     if (agent.includes('Kindle')) filename = kindleSafeFilename(filename)
     
     let data = upload.data
@@ -82,7 +81,7 @@ async function prepareFile(
             conversion = 'kepubify'
             data = await runKepubify(data)
             filename = filename.replace(/\.kepub\.epub$/i, '.epub').replace(/\.epub$/i, '.kepub.epub')
-        } else if (mimetype === 'application/pdf' && fields.has('pdfcropmargins')) {
+        } else if (PDF_CROP_ENABLED && mimetype === 'application/pdf' && fields.has('pdfcropmargins')) {
             conversion = 'pdfcropmargins'
             data = await runPdfCropMargins(data)
         } else {
